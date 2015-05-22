@@ -524,6 +524,29 @@ textarea.form-control{
     right: 0;
     color:#CCC;
 }
+
+.delete-message {
+  	background: #ff0100 none repeat scroll 0 0;
+    border-radius: 5px;
+    color: #ffffff;
+    height: 27px;
+    line-height: 24px;
+    position: absolute;
+    text-align: center;
+    width: 140px;
+}
+.delete-message:after {
+  content: '';
+  position: absolute;
+  top: -29%;
+  left: 50%;
+  margin-left: -8px;
+  width: 0; height: 0;
+  border-bottom: 8px solid #FF0100;
+  border-right: 8px solid transparent;
+  border-left: 8px solid transparent;
+}
+
 #message-conatiner{
     border-bottom: 1px solid #ccc;
     margin: 0;

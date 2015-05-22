@@ -129,6 +129,7 @@ $response = json_decode($response,true);
 						<ul class="short-messages">
 							<?php 
 							for($i=$count-1; $i>=0; $i--){
+								$message_id = $response['messages'][$i]['message_id'];
 								$sent_time = $response['messages'][$i]['send_time']- $tzOffset*60;
 								$sent_time = date("d-M-Y H:i:s", $sent_time);
 								//$sent_time = date("Y-m-d H:i:s", $timestamp);
@@ -143,6 +144,7 @@ $response = json_decode($response,true);
 									<span class="sms-text"><?php echo $title;?></span>
 									<p class="sms-text"><?php echo $response['messages'][$i]['description'];?></p>
 									<span class="sms-date"><?php echo $sent_time;?></span>
+									<button class="delete-message" id="<?php echo $message_id;?>">Delete Message</button>
 								</li>
 							<?php	
 							}?>
@@ -179,6 +181,19 @@ $response = json_decode($response,true);
 	        	$('.end_time').removeClass('hiden'); 
 	        	$('.message_title').removeClass('hiden'); 
 	        }
+        });
+        
+        $('.delete-message').click(function(){       			
+			if (confirm("Are you sure you want to delete this message?"))
+			{
+				var message_id = $(this).attr('id');
+				var user_id = '<?php echo $_SESSION['UserId']; ?>';
+				var api_key   = '<?php echo $_SESSION['ApiKey']; ?>';
+				var url = "<?php echo ROOT_PATH;?>v1/deleteIndividualMessage/" + message_id + "/" + user_id;
+				var data = "";
+				ajaxPostCallAuth(api_key, url, data, OnSuccessFunction);
+				//alert(url);			
+			}
         });
 		
 		var api_key = '<?php echo $_SESSION["ApiKey"]; ?>';
@@ -227,4 +242,7 @@ $response = json_decode($response,true);
 		}
 		
 	};
+	function OnSuccessFunction(response){
+		alert(response.message);
+	}
 </script>
