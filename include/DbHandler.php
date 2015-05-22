@@ -128,20 +128,13 @@ class DbHandler {
             // insert query
             $stmt = $this->conn->prepare("INSERT INTO users(user_role, user_status, salutation, first_name, last_name, gender, date_of_birth_month, date_of_birth_year, phone, category, image_url, country, state, postcode, suburb, residence, email, password, api_key, created_on, created_by, updated_on, updated_by) values(1, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->bind_param("sssssssisssssissssisi", $salutation, $first_name, $last_name, $gender, $date_of_birth_month, $date_of_birth_year, $phone, $category, $image_url, $country, $state, $postcode, $suburb, $residence, $email, $password_hash, $api_key, $dateTime, $user_id, $dateTime, $user_id);
-
             $result = $stmt->execute();
-
-            $stmt->close();
+            $app_user_id = $stmt->insert_id;
+            //$stmt->close();
 
             // Check for successful insertion
             if ($result) {
-				//update relationship for that requested before registration
-//				$user = $this->getUserByEmail($email);
-//				$second_user_id = $user['user_id'];
-//				$active = 1;
-//				$this->updateAppApp($second_user_id, $active, $email);
-//				$this->updateResidenceApp($second_user_id, $active, $email);
-                // User successfully inserted
+				addDefaultSpsForAppUser($app_user_id, $country, $state);
                 return USER_CREATED_SUCCESSFULLY;
             } else {
                 // Failed to create user
@@ -151,6 +144,7 @@ class DbHandler {
         	if (!$this->isUserActive($email)){
 				$user = $this->getUserByEmail($email);
 				$app_user_id = $user['user_id'];
+				addDefaultSpsForAppUser($app_user_id, $country, $state);
 				return $this->updateInvitedAppUser($app_user_id, $salutation, $first_name, $last_name, $gender, $date_of_birth_month, $date_of_birth_year, $phone, $category, $image_url, $country, $state, $postcode, $suburb, $residence, $password_hash, $api_key);
 			}else{
 				// User with same email already existed in the db
@@ -231,7 +225,7 @@ class DbHandler {
      * @param String $email User login email id
      * @param String $password User login password
      */
-    public function spRegistration($user_role, $organisation_name, $address, $country, $state, $postcode, $suburb, $primary_contact, $phone, $image_url, $category, $organisation_description, $email, $password) {
+    public function spRegistration($user_role, $organisation_name, $address, $country, $state, $postcode, $suburb, $primary_contact, $phone, $image_url, $category, $location, $organisation_description, $email, $password) {
         require_once 'PassHash.php';
         $response = array();
 		$user_id=0;
@@ -248,8 +242,8 @@ class DbHandler {
             $api_key = $this->generateApiKey();
 
             // insert query
-            $stmt = $this->conn->prepare("INSERT INTO users(user_role, user_status, organisation_name, address, country, state, postcode, suburb, primary_contact, phone, image_url, category, organisation_description, email, password, api_key, created_on, created_by, updated_on, updated_by) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("iisssssssssisssssisi", $user_role, $user_status, $organisation_name, $address, $country, $state, $postcode, $suburb, $primary_contact, $phone, $image_url, $category, $organisation_description, $email, $password_hash, $api_key, $dateTime, $user_id, $dateTime, $user_id);
+            $stmt = $this->conn->prepare("INSERT INTO users(user_role, user_status, organisation_name, address, country, state, postcode, suburb, primary_contact, phone, image_url, category, location, organisation_description, email, password, api_key, created_on, created_by, updated_on, updated_by) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("iisssssssssiisssssisi", $user_role, $user_status, $organisation_name, $address, $country, $state, $postcode, $suburb, $primary_contact, $phone, $image_url, $category, $location, $organisation_description, $email, $password_hash, $api_key, $dateTime, $user_id, $dateTime, $user_id);
 
             $result = $stmt->execute();
 
@@ -479,7 +473,7 @@ class DbHandler {
 
     }
     
-    public function updateProfile($user_id, $organisation_name, $address, $country, $state, $postcode, $suburb, $primary_contact, $phone, $image_url, $category, $organisation_description, $email, $password) {
+    public function updateProfile($user_id, $organisation_name, $address, $country, $state, $postcode, $suburb, $primary_contact, $phone, $image_url, $category, $location, $organisation_description, $email, $password) {
         require_once 'PassHash.php';
         $response = array();
 		$unixtime = time();
@@ -492,9 +486,9 @@ class DbHandler {
 
 
             // insert query
-            $update_query = "UPDATE users SET organisation_name = ?, address = ?, country = ?, state = ?, postcode = ?, suburb = ?, primary_contact = ?, phone = ?, image_url = ?, category = ?, organisation_description = ?, email = ?, password = ?, updated_on = ?, updated_by = ? WHERE user_id = ?";
+            $update_query = "UPDATE users SET organisation_name = ?, address = ?, country = ?, state = ?, postcode = ?, suburb = ?, primary_contact = ?, phone = ?, image_url = ?, category = ?, location = ?, organisation_description = ?, email = ?, password = ?, updated_on = ?, updated_by = ? WHERE user_id = ?";
             $stmt = $this->conn->prepare($update_query);
-            $stmt->bind_param("sssssssssissssii", $organisation_name, $address, $country, $state, $postcode, $suburb, $primary_contact, $phone, $image_url, $category, $organisation_description, $email, $password_hash, $dateTime, $user_id, $user_id);
+            $stmt->bind_param("sssssssssiissssii", $organisation_name, $address, $country, $state, $postcode, $suburb, $primary_contact, $phone, $image_url, $category, $location, $organisation_description, $email, $password_hash, $dateTime, $user_id, $user_id);
 
             $result = $stmt->execute();
 
@@ -3098,6 +3092,42 @@ YourLink
         $num_rows = $stmt->num_rows;
         $stmt->close();
         return $num_rows > 0;
+    }
+    
+    public function addDefaultSpsForAppUser($app_user_id, $country, $state) {
+        $active = 1;
+        $stmt = $this->conn->prepare("SELECT user_id FROM users WHERE country = ? AND location = 2");		
+		$stmt->bind_param("s", $country);
+        $stmt->execute();
+        $result_sps_country = $stmt->get_result();      
+        $num_rows_sps_country = $result_sps_country->num_rows;
+        
+        $stmt = $this->conn->prepare("SELECT user_id FROM users WHERE state = ? AND location = 1");		
+		$stmt->bind_param("s", $state);
+        $stmt->execute();
+        $result_sps_state = $stmt->get_result();      
+        $num_rows_sps_state = $result_sps_state->num_rows;
+        
+        if ($num_rows_sps_country > 0) //if data exist
+		{
+			while ($sp = $result_sps_country->fetch_assoc()){
+				$sp_id = $sp["user_id"];
+				$stmt = $this->conn->prepare("INSERT INTO appuserssps(app_user_id, sp_id) values(?, ?)");
+				$stmt->bind_param("ii", $app_user_id, $sp_id);		
+				$result = $stmt->execute();
+			}
+		}
+		if ($num_rows_sps_state > 0) //if data exist
+		{
+			while ($sp = $result_sps_state->fetch_assoc()){
+				$sp_id = $sp["user_id"];
+				$stmt = $this->conn->prepare("INSERT INTO appuserssps(app_user_id, sp_id) values(?, ?)");
+				$stmt->bind_param("ii", $app_user_id, $sp_id);		
+				$result = $stmt->execute();
+			}
+		}
+		
+		$stmt->close();
     }
 
 

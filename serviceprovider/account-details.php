@@ -15,6 +15,7 @@ $primary_contact = $response['users'][0]['primary_contact'];
 $phone = $response['users'][0]['phone'];
 $email = $response['users'][0]['email'];
 $category = $response['users'][0]['category'];
+$location = $response['users'][0]['location'];
 $residence = $response['users'][0]['residence'];
 $user_role = $response['users'][0]['user_role'];
 $organisation_description = $response['users'][0]['organisation_description'];
@@ -170,10 +171,22 @@ $response_category = json_decode($response_category,true);
                     <input type="password" class="form-control" id="password" name="password">
                 </div>
             </div>
+            
             <div class="form-group">
                 <label for="confirm_password" class="col-sm-2 col-md-2 control-label">Confirm Password:</label>
                 <div class="col-sm-10 col-md-8">
                     <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="">
+                </div>
+            </div>
+            <div class="form-group location">
+                <label for="location" class="col-sm-2 col-md-2 control-label">Location:</label>
+                <div class="col-sm-10 col-md-8">
+                    <select id="location" name="location">
+                    	<option value="0">Select Location</option>
+						<option value="3" <?php if($location==3){echo 'selected';};?>>Local</option>
+						<option value="1" <?php if($location==1){echo 'selected';};?>>States</option>
+						<option value="2" <?php if($location==2){echo 'selected';};?>>National</option>			
+                    </select>
                 </div>
             </div>
             <div class="form-group">

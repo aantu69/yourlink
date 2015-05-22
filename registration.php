@@ -154,6 +154,17 @@ $response_category = json_decode($response_category,true);
                     </select>
                 </div>
             </div>
+            <div class="form-group location">
+                <label for="location" class="col-sm-2 col-md-2 control-label">Location:</label>
+                <div class="col-sm-10 col-md-8">
+                    <select id="location" name="location">
+                    	<option value="0">Select Location</option>
+						<option value="3">Local</option>
+						<option value="1">States</option>
+						<option value="2">National</option>			
+                    </select>
+                </div>
+            </div>
             <div class="form-group">
                 <div class="col-xs-12 col-sm-8 col-md-8 form-group-inner">
                     <label for="organisation_description" class="col-sm-3 col-md-3 control-label">Organization Description:</label>
@@ -227,9 +238,11 @@ $response_category = json_decode($response_category,true);
 		
 		$('#user_role').change(function() {
 	        if ($(this).is(':checked')) {
-	        	$('.category').addClass('hiden');	            
+	        	$('.category').addClass('hiden');
+	        	$('.location').addClass('hiden');		            
 	        } else {
 	            $('.category').removeClass('hiden');
+	            $('.location').removeClass('hiden');
 	        }
         });
 		
