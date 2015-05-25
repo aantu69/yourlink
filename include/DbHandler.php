@@ -109,6 +109,7 @@ class DbHandler {
      * @param String $email User login email id
      * @param String $password User login password
      */
+    //appRegistration($salutation, $first_name, $last_name, $gender, $date_of_birth_month, $date_of_birth_year, $phone, $image_url, $country, $state, $postcode, $suburb, $residence, $email, $password)
     public function appRegistration($salutation, $first_name, $last_name, $gender, $date_of_birth_month, $date_of_birth_year, $phone, $image_url, $country, $state, $postcode, $suburb, $residence, $email, $password) {
         require_once 'PassHash.php';
         $response = array();
@@ -134,7 +135,7 @@ class DbHandler {
 
             // Check for successful insertion
             if ($result) {
-				addDefaultSpsForAppUser($app_user_id, $country, $state);
+				$this->addDefaultSpsForAppUser($app_user_id, $country, $state);
                 return USER_CREATED_SUCCESSFULLY;
             } else {
                 // Failed to create user
@@ -144,7 +145,7 @@ class DbHandler {
         	if (!$this->isUserActive($email)){
 				$user = $this->getUserByEmail($email);
 				$app_user_id = $user['user_id'];
-				addDefaultSpsForAppUser($app_user_id, $country, $state);
+				$this->addDefaultSpsForAppUser($app_user_id, $country, $state);
 				return $this->updateInvitedAppUser($app_user_id, $salutation, $first_name, $last_name, $gender, $date_of_birth_month, $date_of_birth_year, $phone, $category, $image_url, $country, $state, $postcode, $suburb, $residence, $password_hash, $api_key);
 			}else{
 				// User with same email already existed in the db
